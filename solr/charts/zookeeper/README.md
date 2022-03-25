@@ -19,7 +19,7 @@ $ helm install my-release bitnami/zookeeper
 
 This chart bootstraps a [ZooKeeper](https://github.com/bitnami/bitnami-docker-zookeeper) deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment and management of Helm Charts in clusters. This Helm chart has been tested on top of [Bitnami Kubernetes Production Runtime](https://kubeprod.io/) (BKPR). Deploy BKPR to get automated TLS certificates, logging and monitoring for your applications.
+Bitnami charts can be used with [Kubeapps](https://kubeapps.dev/) for deployment and management of Helm Charts in clusters.
 
 ## Prerequisites
 
@@ -84,7 +84,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | `image.registry`            | ZooKeeper image registry                                                                                                   | `docker.io`             |
 | `image.repository`          | ZooKeeper image repository                                                                                                 | `bitnami/zookeeper`     |
-| `image.tag`                 | ZooKeeper image tag (immutable tags are recommended)                                                                       | `3.7.0-debian-10-r265`  |
+| `image.tag`                 | ZooKeeper image tag (immutable tags are recommended)                                                                       | `3.8.0-debian-11-r0`    |
 | `image.pullPolicy`          | ZooKeeper image pull policy                                                                                                | `IfNotPresent`          |
 | `image.pullSecrets`         | Specify docker-registry secret names as an array                                                                           | `[]`                    |
 | `image.debug`               | Specify if debug values should be set                                                                                      | `false`                 |
@@ -171,7 +171,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | `affinity`                              | Affinity for pod assignment                                                                                                                                                                       | `{}`            |
 | `nodeSelector`                          | Node labels for pod assignment                                                                                                                                                                    | `{}`            |
 | `tolerations`                           | Tolerations for pod assignment                                                                                                                                                                    | `[]`            |
-| `topologySpreadConstraints`             | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template                                                                          | `{}`            |
+| `topologySpreadConstraints`             | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template                                                                          | `[]`            |
 | `podManagementPolicy`                   | StatefulSet controller supports relax its ordering guarantees while preserving its uniqueness and identity guarantees. There are two valid pod management policies: `OrderedReady` and `Parallel` | `Parallel`      |
 | `priorityClassName`                     | Name of the existing priority class to be used by ZooKeeper pods, priority class needs to be created beforehand                                                                                   | `""`            |
 | `schedulerName`                         | Kubernetes pod scheduler registry                                                                                                                                                                 | `""`            |
@@ -199,6 +199,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | `service.nodePorts.tls`                     | Node port for TLS                                                                       | `""`        |
 | `service.disableBaseClientPort`             | Remove client port from service definitions.                                            | `false`     |
 | `service.sessionAffinity`                   | Control where client requests go, to the same pod or round-robin                        | `None`      |
+| `service.sessionAffinityConfig`             | Additional settings for the sessionAffinity                                             | `{}`        |
 | `service.clusterIP`                         | ZooKeeper service Cluster IP                                                            | `""`        |
 | `service.loadBalancerIP`                    | ZooKeeper service Load Balancer IP                                                      | `""`        |
 | `service.loadBalancerSourceRanges`          | ZooKeeper service Load Balancer sources                                                 | `[]`        |
@@ -244,7 +245,7 @@ The command removes all the Kubernetes components associated with the chart and 
 | `volumePermissions.enabled`                            | Enable init container that changes the owner and group of the persistent volume | `false`                 |
 | `volumePermissions.image.registry`                     | Init container volume-permissions image registry                                | `docker.io`             |
 | `volumePermissions.image.repository`                   | Init container volume-permissions image repository                              | `bitnami/bitnami-shell` |
-| `volumePermissions.image.tag`                          | Init container volume-permissions image tag (immutable tags are recommended)    | `10-debian-10-r312`     |
+| `volumePermissions.image.tag`                          | Init container volume-permissions image tag (immutable tags are recommended)    | `11-debian-11-r0`       |
 | `volumePermissions.image.pullPolicy`                   | Init container volume-permissions image pull policy                             | `IfNotPresent`          |
 | `volumePermissions.image.pullSecrets`                  | Init container volume-permissions image pull secrets                            | `[]`                    |
 | `volumePermissions.resources.limits`                   | Init container volume-permissions resource limits                               | `{}`                    |
@@ -279,26 +280,36 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ### TLS/SSL parameters
 
-| Name                             | Description                                                                                     | Value                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `tls.client.enabled`             | Enable TLS for client connections                                                               | `false`                                                               |
-| `tls.client.autoGenerated`       | Generate automatically self-signed TLS certificates for ZooKeeper client communications         | `false`                                                               |
-| `tls.client.existingSecret`      | Name of the existing secret containing the TLS certificates for ZooKeeper client communications | `""`                                                                  |
-| `tls.client.keystorePath`        | Location of the KeyStore file used for Client connections                                       | `/opt/bitnami/zookeeper/config/certs/client/zookeeper.keystore.jks`   |
-| `tls.client.truststorePath`      | Location of the TrustStore file used for Client connections                                     | `/opt/bitnami/zookeeper/config/certs/client/zookeeper.truststore.jks` |
-| `tls.client.passwordsSecretName` | Existing secret containing Keystore and truststore passwords                                    | `""`                                                                  |
-| `tls.client.keystorePassword`    | Password to access KeyStore if needed                                                           | `""`                                                                  |
-| `tls.client.truststorePassword`  | Password to access TrustStore if needed                                                         | `""`                                                                  |
-| `tls.quorum.enabled`             | Enable TLS for quorum protocol                                                                  | `false`                                                               |
-| `tls.quorum.autoGenerated`       | Create self-signed TLS certificates. Currently only supports PEM certificates.                  | `false`                                                               |
-| `tls.quorum.existingSecret`      | Name of the existing secret containing the TLS certificates for ZooKeeper quorum protocol       | `""`                                                                  |
-| `tls.quorum.keystorePath`        | Location of the KeyStore file used for Quorum protocol                                          | `/opt/bitnami/zookeeper/config/certs/quorum/zookeeper.keystore.jks`   |
-| `tls.quorum.truststorePath`      | Location of the TrustStore file used for Quorum protocol                                        | `/opt/bitnami/zookeeper/config/certs/quorum/zookeeper.truststore.jks` |
-| `tls.quorum.passwordsSecretName` | Existing secret containing Keystore and truststore passwords                                    | `""`                                                                  |
-| `tls.quorum.keystorePassword`    | Password to access KeyStore if needed                                                           | `""`                                                                  |
-| `tls.quorum.truststorePassword`  | Password to access TrustStore if needed                                                         | `""`                                                                  |
-| `tls.resources.limits`           | The resources limits for the TLS init container                                                 | `{}`                                                                  |
-| `tls.resources.requests`         | The requested resources for the TLS init container                                              | `{}`                                                                  |
+| Name                                      | Description                                                                                        | Value                                                                 |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `tls.client.enabled`                      | Enable TLS for client connections                                                                  | `false`                                                               |
+| `tls.client.auth`                         | SSL Client auth. Can be "none", "want" or "need".                                                  | `none`                                                                |
+| `tls.client.autoGenerated`                | Generate automatically self-signed TLS certificates for ZooKeeper client communications            | `false`                                                               |
+| `tls.client.existingSecret`               | Name of the existing secret containing the TLS certificates for ZooKeeper client communications    | `""`                                                                  |
+| `tls.client.existingSecretKeystoreKey`    | The secret key from the tls.client.existingSecret containing the Keystore.                         | `""`                                                                  |
+| `tls.client.existingSecretTruststoreKey`  | The secret key from the tls.client.existingSecret containing the Truststore.                       | `""`                                                                  |
+| `tls.client.keystorePath`                 | Location of the KeyStore file used for Client connections                                          | `/opt/bitnami/zookeeper/config/certs/client/zookeeper.keystore.jks`   |
+| `tls.client.truststorePath`               | Location of the TrustStore file used for Client connections                                        | `/opt/bitnami/zookeeper/config/certs/client/zookeeper.truststore.jks` |
+| `tls.client.passwordsSecretName`          | Existing secret containing Keystore and truststore passwords                                       | `""`                                                                  |
+| `tls.client.passwordsSecretKeystoreKey`   | The secret key from the tls.client.passwordsSecretName containing the password for the Keystore.   | `""`                                                                  |
+| `tls.client.passwordsSecretTruststoreKey` | The secret key from the tls.client.passwordsSecretName containing the password for the Truststore. | `""`                                                                  |
+| `tls.client.keystorePassword`             | Password to access KeyStore if needed                                                              | `""`                                                                  |
+| `tls.client.truststorePassword`           | Password to access TrustStore if needed                                                            | `""`                                                                  |
+| `tls.quorum.enabled`                      | Enable TLS for quorum protocol                                                                     | `false`                                                               |
+| `tls.quorum.auth`                         | SSL Quorum Client auth. Can be "none", "want" or "need".                                           | `none`                                                                |
+| `tls.quorum.autoGenerated`                | Create self-signed TLS certificates. Currently only supports PEM certificates.                     | `false`                                                               |
+| `tls.quorum.existingSecret`               | Name of the existing secret containing the TLS certificates for ZooKeeper quorum protocol          | `""`                                                                  |
+| `tls.quorum.existingSecretKeystoreKey`    | The secret key from the tls.quorum.existingSecret containing the Keystore.                         | `""`                                                                  |
+| `tls.quorum.existingSecretTruststoreKey`  | The secret key from the tls.quorum.existingSecret containing the Truststore.                       | `""`                                                                  |
+| `tls.quorum.keystorePath`                 | Location of the KeyStore file used for Quorum protocol                                             | `/opt/bitnami/zookeeper/config/certs/quorum/zookeeper.keystore.jks`   |
+| `tls.quorum.truststorePath`               | Location of the TrustStore file used for Quorum protocol                                           | `/opt/bitnami/zookeeper/config/certs/quorum/zookeeper.truststore.jks` |
+| `tls.quorum.passwordsSecretName`          | Existing secret containing Keystore and truststore passwords                                       | `""`                                                                  |
+| `tls.quorum.passwordsSecretKeystoreKey`   | The secret key from the tls.quorum.passwordsSecretName containing the password for the Keystore.   | `""`                                                                  |
+| `tls.quorum.passwordsSecretTruststoreKey` | The secret key from the tls.quorum.passwordsSecretName containing the password for the Truststore. | `""`                                                                  |
+| `tls.quorum.keystorePassword`             | Password to access KeyStore if needed                                                              | `""`                                                                  |
+| `tls.quorum.truststorePassword`           | Password to access TrustStore if needed                                                            | `""`                                                                  |
+| `tls.resources.limits`                    | The resources limits for the TLS init container                                                    | `{}`                                                                  |
+| `tls.resources.requests`                  | The requested resources for the TLS init container                                                 | `{}`                                                                  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
@@ -408,6 +419,10 @@ As an alternative, you can use any of the preset configurations for pod affinity
 Find more information about how to deal with common errors related to Bitnami's Helm charts in [this troubleshooting guide](https://docs.bitnami.com/general/how-to/troubleshoot-helm-chart-issues).
 
 ## Upgrading
+
+### To 9.0.0
+
+This new version of the chart includes the new ZooKeeper major version 3.8.0. Upgrade compatibility is not guaranteed.
 
 ### To 8.0.0
 
